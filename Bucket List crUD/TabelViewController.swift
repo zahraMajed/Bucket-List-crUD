@@ -6,13 +6,14 @@
 //
 
 import UIKit
+import CoreData
 
 class TabelViewController: UITableViewController , TabelVCTwoDelegates {
-    
-    var tasks : [Tasks] = [Tasks(tasNname: "cooking")]
+    var tasks : [TasksStruct] = []
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        tasks = getTask()
     }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -31,7 +32,8 @@ class TabelViewController: UITableViewController , TabelVCTwoDelegates {
     }
     
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
-        tasks.remove(at: indexPath.row)
+        deleteTask(indexP: indexPath.row)
+        tasks = getTask()
         tableView.reloadData()
     }
     
@@ -50,23 +52,104 @@ class TabelViewController: UITableViewController , TabelVCTwoDelegates {
         }
     }
     
+    func dismisWithCancelBtn(tvc: UITableViewController) {
+        dismiss(animated: true, completion: nil)
+    }
+    
     func dismissWithAddBtn(taskName: String, at: NSIndexPath?) {
         if let ip = at {
-            tasks[ip.row].tasNname = taskName
+            //tasks[ip.row].tasNname = taskName
+            updateTaks(taskName: taskName, indexP: ip.row)
         } else{
-            tasks.append(Tasks(tasNname: taskName))
+            //tasks.append(Tasks(tasNname: taskName))
+            addTask(taskName: taskName)
         }
+        tasks = getTask()
         tableView.reloadData()
         dismiss(animated: true, completion: nil)
     }
     
-    func dismisWithCancelBtn(tvc: UITableViewController) {
-        dismiss(animated: true, completion: nil)
+    
+    func addTask(taskName:String){
+        // refer to appdelegate in order to be abel accessing persistentContainer
+        guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else {return}
+        // create context from persistentContainer -context is mu DB-
+        let context = appDelegate.persistentContainer.viewContext
+        // create entity
+        guard let tasksEntity = NSEntityDescription.entity(forEntityName: "Task", in: context) else {return}
+        
+        //create record and set value to it
+        let task = NSManagedObject(entity: tasksEntity, insertInto: context)
+        task.setValue(taskName, forKey: "taskName")
+        
+        // save changes to database (context)
+        do{
+            try context.save()
+        }catch {
+            print("===Error addTask Function===")
+        }
     }
-
+    
+    func updateTaks(taskName:String, indexP:Int){
+        // refer to appdelegate in order to be abel accessing persistentContainer
+        guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else {return}
+        // create context from persistentContainer -context is mu DB-
+        let context = appDelegate.persistentContainer.viewContext
+        // get fetch request
+        let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "Task")
+        
+        do {
+           let result = try context.fetch(fetchRequest) as! [NSManagedObject]
+            result[indexP].setValue(taskName, forKey: "taskName")
+            try context.save()
+            
+        }catch {
+            print("===Error updateTaks Function===")
+        }
+    }
+    
+    func getTask() -> [TasksStruct] {
+        var taskArrayInGetTasks:[TasksStruct] = []
+        // refer to appdelegate in order to be abel accessing persistentContainer
+        guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else {return []}
+        // create context from persistentContainer -context is mu DB-
+        let context = appDelegate.persistentContainer.viewContext
+        // get fetch request
+        let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "Task")
+        
+        do {
+           let result = try context.fetch(fetchRequest) as! [NSManagedObject]
+            for data in result {
+                let taskName = data.value(forKey: "taskName") as! String
+                taskArrayInGetTasks.append(TasksStruct(tasNname: taskName))
+            }
+        }catch {
+            print("===Error getTasks Function===")
+        }
+        return taskArrayInGetTasks
+    }
+    
+    func deleteTask(indexP:Int){
+        // refer to appdelegate in order to be abel accessing persistentContainer
+        guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else {return}
+        // create context from persistentContainer -context is mu DB-
+        let context = appDelegate.persistentContainer.viewContext
+        // get fetch request
+        let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "Task")
+        
+        do{
+            let test = try context.fetch(fetchRequest)
+            let objectToDel = test[indexP] as! NSManagedObject
+            context.delete(objectToDel)
+            try context.save()
+            
+        }catch{
+            print("======Error Delete function========")
+        }
+    }
 }
 
-struct Tasks {
+struct TasksStruct {
     var tasNname: String
 }
 
