@@ -33,7 +33,7 @@
                     <navigationItem key="navigationItem" id="Wl3-s5-X6M">
                         <barButtonItem key="rightBarButtonItem" systemItem="add" id="QFc-0p-2s5">
                             <connections>
-                                <segue destination="qHr-Te-SBq" kind="presentation" identifier="AddTask" id="G4Y-2A-Sma"/>
+                                <segue destination="qHr-Te-SBq" kind="presentation" id="PQD-Pe-uPV"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>

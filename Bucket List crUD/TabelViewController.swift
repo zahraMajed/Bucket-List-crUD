@@ -36,11 +36,11 @@ class TabelViewController: UITableViewController , TabelVCTwoDelegates {
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if segue.identifier == "AddTask" {
+        if sender is UIBarButtonItem {
             let destination = segue.destination as!  UINavigationController
             let tvc2 = destination.topViewController as! TableViewControllerTwo
             tvc2.delegate = self
-        } else if segue.identifier == "EditTask" {
+        } else if sender is IndexPath {
             let destination = segue.destination as!  UINavigationController
             let tvc2 = destination.topViewController as! TableViewControllerTwo
             tvc2.delegate = self
