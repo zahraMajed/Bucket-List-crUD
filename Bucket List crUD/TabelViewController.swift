@@ -13,16 +13,18 @@ class TabelViewController: UITableViewController , TabelVCTwoDelegates {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        tasks = getTask()
+        //tasks = getTask()
+        attemptsToFetchTaskAPI()
     }
     
+    //TABLE VIEW FUNCTION
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return tasks.count
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "myCell", for: indexPath)
-        cell.textLabel?.text = tasks[indexPath.row].tasNname
+        cell.textLabel?.text = tasks[indexPath.row].objective
         return cell
     }
 
@@ -32,11 +34,35 @@ class TabelViewController: UITableViewController , TabelVCTwoDelegates {
     }
     
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+        //shoud be deleteTaskAPI function and  then call attemptsToFetchTaskAPI() inside it
         deleteTask(indexP: indexPath.row)
         tasks = getTask()
         tableView.reloadData()
     }
     
+    //API
+    func attemptsToFetchTaskAPI(){
+        TaskAPI.getTaskAPIResult { tasksResonseArray, error in
+            if let error = error {
+                print("Error: \(error.localizedDescription)")
+                return
+            }
+            guard let tasksResonseArray = tasksResonseArray else {
+                return
+            }
+            self.tasks = tasksResonseArray
+            DispatchQueue.main.async {
+                self.tableView.reloadData()
+            }
+        }
+    }
+    
+    func attemptsToPostTaskAPI(objective:String){
+        TaskAPI.postTaskToAPI(objective: objective)
+        attemptsToFetchTaskAPI()
+    }
+    
+    //PREPARE
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if sender is UIBarButtonItem {
             let destination = segue.destination as!  UINavigationController
@@ -47,11 +73,12 @@ class TabelViewController: UITableViewController , TabelVCTwoDelegates {
             let tvc2 = destination.topViewController as! TableViewControllerTwo
             tvc2.delegate = self
             let indexPAth = sender as! NSIndexPath
-            tvc2.taskName = tasks[indexPAth.row].tasNname
+            tvc2.taskName = tasks[indexPAth.row].objective
             tvc2.indexP = indexPAth
         }
     }
     
+    //DELEGATES FUNCTION
     func dismisWithCancelBtn(tvc: UITableViewController) {
         dismiss(animated: true, completion: nil)
     }
@@ -60,16 +87,17 @@ class TabelViewController: UITableViewController , TabelVCTwoDelegates {
         if let ip = at {
             //tasks[ip.row].tasNname = taskName
             updateTaks(taskName: taskName, indexP: ip.row)
-        } else{
+            tasks = getTask()
+            tableView.reloadData()
+        }else{
             //tasks.append(Tasks(tasNname: taskName))
-            addTask(taskName: taskName)
+            //addTask(taskName: taskName)
+            attemptsToPostTaskAPI(objective: taskName)
         }
-        tasks = getTask()
-        tableView.reloadData()
         dismiss(animated: true, completion: nil)
     }
     
-    
+    // CORE DATA PART CODE
     func addTask(taskName:String){
         // refer to appdelegate in order to be abel accessing persistentContainer
         guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else {return}
@@ -121,7 +149,7 @@ class TabelViewController: UITableViewController , TabelVCTwoDelegates {
            let result = try context.fetch(fetchRequest) as! [NSManagedObject]
             for data in result {
                 let taskName = data.value(forKey: "taskName") as! String
-                taskArrayInGetTasks.append(TasksStruct(tasNname: taskName))
+                taskArrayInGetTasks.append(TasksStruct(objective: taskName))
             }
         }catch {
             print("===Error getTasks Function===")
@@ -148,8 +176,3 @@ class TabelViewController: UITableViewController , TabelVCTwoDelegates {
         }
     }
 }
-
-struct TasksStruct {
-    var tasNname: String
-}
-
