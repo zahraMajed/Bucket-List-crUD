@@ -35,9 +35,11 @@ class TabelViewController: UITableViewController , TabelVCTwoDelegates {
     
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         //shoud be deleteTaskAPI function and  then call attemptsToFetchTaskAPI() inside it
-        deleteTask(indexP: indexPath.row)
-        tasks = getTask()
-        tableView.reloadData()
+       //deleteTask(indexP: indexPath.row)
+       //tasks = getTask()
+        //tableView.reloadData()
+        let id = tasks[indexPath.row].id
+        attemptsToDelTaskAPI(id: id)
     }
     
     //API
@@ -59,6 +61,16 @@ class TabelViewController: UITableViewController , TabelVCTwoDelegates {
     
     func attemptsToPostTaskAPI(objective:String){
         TaskAPI.postTaskToAPI(objective: objective)
+        attemptsToFetchTaskAPI()
+    }
+    
+    func attemptsToDelTaskAPI(id:String){
+        TaskAPI.delAPITask(id: id)
+        attemptsToFetchTaskAPI()
+    }
+    
+    func attemptsToUpdateAPITask(objective:String, id:String){
+        TaskAPI.updateAPITask(objective: objective, id: id)
         attemptsToFetchTaskAPI()
     }
     
@@ -86,9 +98,11 @@ class TabelViewController: UITableViewController , TabelVCTwoDelegates {
     func dismissWithAddBtn(taskName: String, at: NSIndexPath?) {
         if let ip = at {
             //tasks[ip.row].tasNname = taskName
-            updateTaks(taskName: taskName, indexP: ip.row)
-            tasks = getTask()
-            tableView.reloadData()
+            //updateTaks(taskName: taskName, indexP: ip.row)
+            //tasks = getTask()
+            //tableView.reloadData()
+            let id = tasks[ip.row].id
+            attemptsToUpdateAPITask(objective: taskName, id: id)
         }else{
             //tasks.append(Tasks(tasNname: taskName))
             //addTask(taskName: taskName)
@@ -98,7 +112,7 @@ class TabelViewController: UITableViewController , TabelVCTwoDelegates {
     }
     
     // CORE DATA PART CODE
-    func addTask(taskName:String){
+    /*func addTask(taskName:String){
         // refer to appdelegate in order to be abel accessing persistentContainer
         guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else {return}
         // create context from persistentContainer -context is mu DB-
@@ -116,9 +130,9 @@ class TabelViewController: UITableViewController , TabelVCTwoDelegates {
         }catch {
             print("===Error addTask Function===")
         }
-    }
+    }*/
     
-    func updateTaks(taskName:String, indexP:Int){
+    /*func updateTaks(taskName:String, indexP:Int){
         // refer to appdelegate in order to be abel accessing persistentContainer
         guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else {return}
         // create context from persistentContainer -context is mu DB-
@@ -134,9 +148,9 @@ class TabelViewController: UITableViewController , TabelVCTwoDelegates {
         }catch {
             print("===Error updateTaks Function===")
         }
-    }
+    }*/
     
-    func getTask() -> [TasksStruct] {
+    /*func getTask() -> [TasksStruct] {
         var taskArrayInGetTasks:[TasksStruct] = []
         // refer to appdelegate in order to be abel accessing persistentContainer
         guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else {return []}
@@ -155,9 +169,9 @@ class TabelViewController: UITableViewController , TabelVCTwoDelegates {
             print("===Error getTasks Function===")
         }
         return taskArrayInGetTasks
-    }
+    }*/
     
-    func deleteTask(indexP:Int){
+    /*func deleteTask(indexP:Int){
         // refer to appdelegate in order to be abel accessing persistentContainer
         guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else {return}
         // create context from persistentContainer -context is mu DB-
@@ -174,5 +188,5 @@ class TabelViewController: UITableViewController , TabelVCTwoDelegates {
         }catch{
             print("======Error Delete function========")
         }
-    }
+    }*/
 }

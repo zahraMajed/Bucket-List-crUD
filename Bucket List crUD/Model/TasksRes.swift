@@ -8,5 +8,6 @@
 import Foundation
 
 struct TasksStruct:Decodable {
+    var id: String
     var objective:String
 }
